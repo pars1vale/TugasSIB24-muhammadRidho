@@ -1,27 +1,66 @@
-const slides = document.querySelectorAll("[data-slide]");
-const buttons = document.querySelectorAll("[data-button]");
 
-let currSlide = 0;
-let maxSlide = slides.length - 1;
+(function () {
 
-const updateCarousel = (number = 0) => {
-    slides.forEach((slide, index) => {
-        slide.style.transform = `translateX(${(index - number) * 100}%)`;
-    });
-};
+    function Slideshow(element) {
+        this.el = document.querySelector(element);
+        this.init();
+    }
 
-buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-        button.dataset.button == "next" ? ++currSlide : --currSlide;
+    Slideshow.prototype = {
+        init: function () {
+            this.wrapper = this.el.querySelector(".slider-wrapper");
+            this.slides = this.el.querySelectorAll(".slide");
+            this.index = 0;
+            this.total = this.slides.length;
+            this.timer = null;
 
-        if (currSlide > maxSlide) {
-            currSlide = 0;
-        } else if (currSlide < 0) {
-            currSlide = maxSlide;
+            this.action();
+            this.stopStart();
+        },
+        _slideTo: function (slide) {
+            var currentSlide = this.slides[slide];
+            currentSlide.style.opacity = 1;
+
+            for (var i = 0; i < this.slides.length; i++) {
+                var slide = this.slides[i];
+                if (slide !== currentSlide) {
+                    slide.style.opacity = 0;
+                }
+            }
+        },
+        action: function () {
+            var self = this;
+            self.timer = setInterval(function () {
+                self.index++;
+                if (self.index == self.slides.length) {
+                    self.index = 0;
+                }
+                self._slideTo(self.index);
+
+            }, 3000);
+        },
+        stopStart: function () {
+            var self = this;
+            self.el.addEventListener("mouseover", function () {
+                clearInterval(self.timer);
+                self.timer = null;
+
+            }, false);
+            self.el.addEventListener("mouseout", function () {
+                self.action();
+
+            }, false);
         }
 
-        updateCarousel(currSlide);
-    });
-});
 
-updateCarousel();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var slider = new Slideshow("#slider-utama");
+
+    });
+
+
+})();
+
